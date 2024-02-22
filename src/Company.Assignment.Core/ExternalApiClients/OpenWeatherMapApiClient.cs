@@ -2,11 +2,13 @@
 using Company.Assignment.Common.Filters;
 using Company.Assignment.Core.Abstractions.ExternalApiClients;
 using Company.Assignment.Core.Abstractions.Mappers;
+using Company.Assignment.Core.Exceptions;
 using Company.Assignment.Core.ExternalApiClients.Models.OpenWeatherMap;
 using Company.Assignment.Core.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
+using System.Net;
 using System.Text.Json;
 
 namespace Company.Assignment.Core.ExternalApiClients;
@@ -23,6 +25,7 @@ public class OpenWeatherMapApiClient(
 
     public async Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default)
     {
+        ApiResponse<CurrentWeatherResponse> externalApiResponse;
         var queryParams = new Dictionary<string, StringValues>()
         {
             { "lat", new StringValues(aggregateFilter.Weather.Lat.ToString()) },
@@ -30,14 +33,51 @@ public class OpenWeatherMapApiClient(
             { "appid", _externalApiOptions.Value["OpenWeatherMap"].ApiKey }
         };
 
-        var externalApiResponse = await GetRequest<CurrentWeatherResponse>("/data/2.5/weather", queryParams, cancellationToken);
+        try
+        {
+            externalApiResponse = await GetRequest<CurrentWeatherResponse>("/data/2.5/weather", queryParams, cancellationToken);
+        }
+        catch (ExternalApiException ex)
+        {
+            var errorResponseJson = ex.Data[ExternalApiException.ERROR_RESPONSE_KEY];
+            OpenWeatherMapApiErrorResponse? apiErrorResponse = null;
+            if (errorResponseJson != null)
+            {
+                try
+                {
+                    apiErrorResponse = JsonSerializer.Deserialize<OpenWeatherMapApiErrorResponse>(
+                        errorResponseJson != null ? (string)errorResponseJson : string.Empty, jsonSerializerOptions);
+                }
+                catch (Exception)
+                {
+                    Logger.LogWarning("{OpenWeatherMapApiClient} : Cannot deserialize {apiErrorResponse}", nameof(OpenWeatherMapApiClient), apiErrorResponse);
+                }
+            }
+            return new ApiResponse<WeatherDto?>
+            {
+                Success = false,
+                StatusCode = ex.StatusCode ?? HttpStatusCode.InternalServerError,
+                ErrorMessage = apiErrorResponse is not null ? $"{apiErrorResponse.Value.Cod}.{apiErrorResponse.Value.Message}" : errorResponseJson != null ? (string)errorResponseJson : ex.Message
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "{OpenWeatherMapApiClient} : {Message}", nameof(OpenWeatherMapApiClient), ex.Message);
+
+            return new ApiResponse<WeatherDto?>
+            {
+                Success = false,
+                StatusCode = HttpStatusCode.InternalServerError,
+                ErrorMessage = "Something went wrong"
+            };
+        }
 
         return new ApiResponse<WeatherDto?>
         {
-            Success = externalApiResponse.Value.Success,
-            StatusCode = externalApiResponse.Value.StatusCode,
-            ErrorMessage = externalApiResponse.Value.ErrorMessage,
-            Data = externalApiResponse.Value.Data != default ? _mapper.Map(externalApiResponse.Value.Data) : null
+
+            Success = externalApiResponse.Success,
+            StatusCode = externalApiResponse.StatusCode,
+            Data = externalApiResponse.Data != default ? _mapper.Map(externalApiResponse.Data) : null
         };
     }
 }

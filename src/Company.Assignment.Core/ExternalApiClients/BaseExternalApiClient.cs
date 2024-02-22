@@ -1,4 +1,5 @@
-﻿using Company.Assignment.Core.ExternalApiClients.Models;
+﻿using Company.Assignment.Common.Dtos;
+using Company.Assignment.Core.Exceptions;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
@@ -12,7 +13,7 @@ public abstract class BaseExternalApiClient(HttpClient httpClient, ILogger<BaseE
     private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
 
-    internal async Task<ExternalApiResponse<T>?> GetRequest<T>(string requestUri, Dictionary<string, StringValues>? queryParams = null, CancellationToken cancellationToken = default)
+    internal async Task<ApiResponse<T?>> GetRequest<T>(string requestUri, Dictionary<string, StringValues>? queryParams = null, CancellationToken cancellationToken = default)
     {
         if (queryParams is not null)
             requestUri = QueryHelpers.AddQueryString(requestUri, queryParams.Select(x => new KeyValuePair<string, StringValues>(x.Key, x.Value)));
@@ -21,31 +22,32 @@ public abstract class BaseExternalApiClient(HttpClient httpClient, ILogger<BaseE
 
         var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
-        return await GetExternalApiResponse<T>(httpResponseMessage);
+        await EnsureSuccessStatusCode(httpResponseMessage);
+
+        var content = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
+
+        return new ApiResponse<T?>
+        {
+            Success = true,
+            StatusCode = httpResponseMessage.StatusCode,
+            Data = JsonSerializer.Deserialize<T>(content, _jsonSerializerOptions)
+        };
     }
 
-    private async Task<ExternalApiResponse<T>> GetExternalApiResponse<T>(HttpResponseMessage httpResponseMessage)
+    private async Task EnsureSuccessStatusCode(HttpResponseMessage httpResponseMessage)
     {
-        string? errorMessage = null;
-
-        var content = await httpResponseMessage.Content.ReadAsStringAsync();
-
-        if (!httpResponseMessage.IsSuccessStatusCode)
+        if (httpResponseMessage.IsSuccessStatusCode)
         {
-            errorMessage = content;
-
-            Logger.LogError("Http request {RequestUri} failed with status code {StatusCode} and message {responseString}",
-                httpResponseMessage.RequestMessage?.RequestUri,
-                httpResponseMessage.StatusCode,
-                errorMessage);
+            return;
         }
 
-        return new ExternalApiResponse<T>
-        {
-            Success = httpResponseMessage.IsSuccessStatusCode,
-            StatusCode = httpResponseMessage.StatusCode,
-            ErrorMessage = errorMessage,
-            Data = httpResponseMessage.IsSuccessStatusCode ? JsonSerializer.Deserialize<T>(content, _jsonSerializerOptions) : default
-        };
+        var errorResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+
+        Logger.LogError("Http request {RequestUri} failed with status code {StatusCode} and message {responseString}",
+            httpResponseMessage.RequestMessage?.RequestUri,
+            httpResponseMessage.StatusCode,
+            errorResponse);
+
+        throw new ExternalApiException("Unsuccessful response", errorResponse, null, httpResponseMessage.StatusCode);
     }
 }
