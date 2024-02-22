@@ -2,13 +2,12 @@
 
 public readonly record struct WeatherDto
 {
-    public IReadOnlyList<WeatherCondition>? Conditions { get; init; }
+    public IReadOnlyList<WeatherCondition>? WeatherConditions { get; init; }
     public Temperature Temperature { get; init; }
-    public Wind Wind { get; init; }
     public double Pressure { get; init; }
     public double Humidity { get; init; }
     public Location Location { get; init; }
-    public DateTimeOffset Date { get; init; }
+    public DateTimeOffset? Date { get; init; }
 }
 
 public readonly record struct WeatherCondition

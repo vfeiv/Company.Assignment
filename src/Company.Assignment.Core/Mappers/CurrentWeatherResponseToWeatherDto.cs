@@ -8,7 +8,7 @@ public class CurrentWeatherResponseToWeatherDto : BaseMapper<CurrentWeatherRespo
     public override WeatherDto Map(CurrentWeatherResponse from) =>
         new()
         {
-            Conditions = from.Weather?.Select(x => new WeatherCondition
+            WeatherConditions = from.Weather?.Select(x => new WeatherCondition
             {
                 Condition = x.Main,
                 Description = x.Description,
@@ -21,12 +21,6 @@ public class CurrentWeatherResponseToWeatherDto : BaseMapper<CurrentWeatherRespo
                 TempMin = from.Main.TempMin,
                 TempMax = from.Main.TempMax
             },
-            Wind = new Common.Dtos.Wind
-            {
-                Speed = from.Wind.Speed,
-                Deg = from.Wind.Deg,
-                Gust = from.Wind.Gust
-            },
             Pressure = from.Main.Pressure,
             Humidity = from.Main.Humidity,
             Location = new Location
@@ -35,6 +29,6 @@ public class CurrentWeatherResponseToWeatherDto : BaseMapper<CurrentWeatherRespo
                 Lat = (double)from.Coord.Lat,
                 City = from.Name
             },
-            Date = DateTimeOffset.FromUnixTimeSeconds(from.Dt)
+            Date = from.Dt != null ? DateTimeOffset.FromUnixTimeSeconds(from.Dt.Value) : null
         };
 }
