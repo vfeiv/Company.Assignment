@@ -63,9 +63,9 @@ public class NewsApiClient(
             {
                 Success = false,
                 StatusCode = ex.StatusCode ?? HttpStatusCode.InternalServerError,
-                ErrorMessage = apiErrorResponse is not null 
+                ErrorMessage = apiErrorResponse is not null
                 ? $"{apiErrorResponse.Value.Status}.{apiErrorResponse.Value.Code}.{apiErrorResponse.Value.Message}"
-                : errorResponseJson != null 
+                : errorResponseJson != null
                     ? (string)errorResponseJson
                     : ex.Message
             };
@@ -82,12 +82,20 @@ public class NewsApiClient(
             };
         }
 
+        var articles = _mapper.Map(externalApiResponse.Data.Articles) ?? [];
+
+        if (aggregateFilter.Value.SortOptions.HasValue && aggregateFilter.Value.SortOptions.Value.SortBy == SortBy.Date)
+        {
+            articles = aggregateFilter.Value.SortOptions.Value.SortDirection == SortDirection.Asc ?
+                 articles.OrderBy(x => x.PublishedAt).ToList() : articles.OrderByDescending(x => x.PublishedAt).ToList();
+        }
+
         return new ApiResponse<IReadOnlyList<ArticleDto>>
         {
             Success = externalApiResponse.Success,
             StatusCode = externalApiResponse.StatusCode,
             ErrorMessage = externalApiResponse.ErrorMessage,
-            Data = _mapper.Map(externalApiResponse.Data.Articles ?? [])
+            Data = articles
         };
     }
 }
