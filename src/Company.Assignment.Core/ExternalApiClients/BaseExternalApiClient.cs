@@ -13,7 +13,7 @@ public abstract class BaseExternalApiClient(HttpClient httpClient, ILogger<BaseE
     private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
 
-    internal async Task<ApiResponse<T?>> GetRequest<T>(string requestUri, Dictionary<string, StringValues>? queryParams = null, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<T?>> GetRequest<T>(string requestUri, Dictionary<string, StringValues>? queryParams = null, CancellationToken cancellationToken = default)
     {
         if (queryParams is not null)
             requestUri = QueryHelpers.AddQueryString(requestUri, queryParams.Select(x => new KeyValuePair<string, StringValues>(x.Key, x.Value)));
