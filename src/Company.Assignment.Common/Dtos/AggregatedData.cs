@@ -2,7 +2,5 @@
 
 public readonly record struct AggregatedData
 {
-    public AggregatedData() {}
-
-    public string Test { get; init; } = "This is a test";
+    public ApiResponse<WeatherDto?> Weather { get; init; }
 }
