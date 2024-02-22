@@ -1,4 +1,5 @@
 ﻿using Company.Assignment.Common.Dtos;
+using Company.Assignment.Common.Filters;
 using Company.Assignment.Core.Abstractions.ExternalApiClients;
 using Company.Assignment.Core.Abstractions.Mappers;
 using Company.Assignment.Core.ExternalApiClients.Models.Stocks;
@@ -10,7 +11,7 @@ using System.Text.Json;
 
 namespace Company.Assignment.Core.ExternalApiClients;
 
-public class StocksApiClient(
+public class TiingoApiClient(
     HttpClient httpClient,
     ILogger<BaseExternalApiClient> logger,
     IOptions<ExternalApisOptions> externalApiOptions,
@@ -20,14 +21,20 @@ public class StocksApiClient(
     private readonly IOptions<ExternalApisOptions> _externalApiOptions = externalApiOptions ?? throw new ArgumentNullException(nameof(externalApiOptions));
     private readonly IMapper<StockPriceResponse, StockPriceDto> _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
-    public async Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default)
     {
         var queryParams = new Dictionary<string, StringValues>
             {
                 { "token", _externalApiOptions.Value["Tiingo"].ApiKey }
             };
 
-        var externalApiResponse = await GetRequest<List<StockPriceResponse>>($"/tiingo/daily/aapl/prices", queryParams, cancellationToken);
+        if (aggregateFilter.StockPrice.StartDate is not null) 
+            queryParams.Add("startDate", aggregateFilter.StockPrice.StartDate.Value.ToString("yyyy-MM-dd"));
+
+        if (aggregateFilter.StockPrice.EndDate is not null)
+            queryParams.Add("endDate", aggregateFilter.StockPrice.EndDate.Value.ToString("yyyy-MM-dd"));
+
+        var externalApiResponse = await GetRequest<List<StockPriceResponse>>($"/tiingo/daily/{aggregateFilter.StockPrice.Ticker}/prices", queryParams, cancellationToken);
 
         return new ApiResponse<IReadOnlyList<StockPriceDto>>
         {

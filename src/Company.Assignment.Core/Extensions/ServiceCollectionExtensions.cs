@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
             var httpClient = httpClientFactory.CreateClient("OpenWeatherMap");
             return new OpenWeatherMapApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
         });
-        services.AddScoped<IStocksApiClient, StocksApiClient>(sp =>
+        services.AddScoped<IStocksApiClient, TiingoApiClient>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<BaseExternalApiClient>>();
             var options = sp.GetRequiredService<IOptions<ExternalApisOptions>>();
@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
             var jsonSerializerOptions = sp.GetRequiredService<JsonSerializerOptions>();
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient("Tiingo");
-            return new StocksApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
+            return new TiingoApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
         });
         return services;
     }

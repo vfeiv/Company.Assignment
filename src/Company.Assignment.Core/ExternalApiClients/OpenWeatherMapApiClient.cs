@@ -1,4 +1,5 @@
 ﻿using Company.Assignment.Common.Dtos;
+using Company.Assignment.Common.Filters;
 using Company.Assignment.Core.Abstractions.ExternalApiClients;
 using Company.Assignment.Core.Abstractions.Mappers;
 using Company.Assignment.Core.ExternalApiClients.Models.OpenWeatherMap;
@@ -20,14 +21,15 @@ public class OpenWeatherMapApiClient(
     private readonly IOptions<ExternalApisOptions> _externalApiOptions = externalApiOptions ?? throw new ArgumentNullException(nameof(externalApiOptions));
     private readonly IMapper<CurrentWeatherResponse, WeatherDto> _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
-    public async Task<ApiResponse<WeatherDto?>> GetWeather(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default)
     {
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "lat", "37.58596" },
-            { "lon", "23.45005" },
+            { "lat", new StringValues(aggregateFilter.Weather.Lat.ToString()) },
+            { "lon", new StringValues(aggregateFilter.Weather.Lon.ToString()) },
             { "appid", _externalApiOptions.Value["OpenWeatherMap"].ApiKey }
         };
+
         var externalApiResponse = await GetRequest<CurrentWeatherResponse>("/data/2.5/weather", queryParams, cancellationToken);
 
         return new ApiResponse<WeatherDto?>
