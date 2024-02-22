@@ -1,6 +1,6 @@
 ﻿namespace Company.Assignment.Core.ExternalApiClients.Models.News;
 
-internal readonly record struct TopHeadLinesRespone
+public readonly record struct TopHeadLinesRespone
 {
     public List<ArticleResponse> Articles { get; init; }
 }

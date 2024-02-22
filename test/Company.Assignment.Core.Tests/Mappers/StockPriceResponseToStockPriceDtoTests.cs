@@ -1,6 +1,5 @@
 ﻿using AutoFixture.Xunit2;
 using Company.Assignment.Common.Dtos;
-using Company.Assignment.Core.ExternalApiClients.Models.OpenWeatherMap;
 using Company.Assignment.Core.ExternalApiClients.Models.Stocks;
 using Company.Assignment.Core.Mappers;
 using FluentAssertions;
