@@ -63,7 +63,7 @@ public class TiingoApiClientTests
                 Content = new StringContent(JsonSerializer.Serialize(apiResponse, _jsonSerializerOptions))
             });
 
-        var response = await _client.GetStockPrices();
+        var response = await _client.GetStockPrices(null);
 
         response.Data.Should().NotBeNull();
         response.Data.Should().BeEquivalentTo(_mapper.Map(apiResponse));
@@ -92,7 +92,7 @@ public class TiingoApiClientTests
                 Content = new StringContent(JsonSerializer.Serialize(errorResponse, _jsonSerializerOptions))
             });
 
-        var response = await _client.GetStockPrices();
+        var response = await _client.GetStockPrices(null);
 
         response.Data.Should().BeNull();
         response.StatusCode.Should().Be(httpStatusCode);
@@ -111,7 +111,7 @@ public class TiingoApiClientTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new Exception());
 
-        var response = await _client.GetStockPrices();
+        var response = await _client.GetStockPrices(null);
 
         response.Data.Should().BeNull();
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);

@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
             var httpClient = httpClientFactory.CreateClient("OpenWeatherMap");
             return new OpenWeatherMapApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
         });
-        services.AddScoped<IStocksApiClient, TiingoApiClient>(sp =>
+        services.AddScoped<ITiingoApiClient, TiingoApiClient>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<BaseExternalApiClient>>();
             var options = sp.GetRequiredService<IOptions<ExternalApisOptions>>();

@@ -24,7 +24,7 @@ public class OpenWeatherMapApiClient(
     private readonly IMapper<CurrentWeatherResponse, WeatherDto> _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
 
-    public async Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter? aggregateFilter = null, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter? aggregateFilter, CancellationToken cancellationToken = default)
     {
         ApiResponse<CurrentWeatherResponse> externalApiResponse;
 

@@ -5,5 +5,5 @@ namespace Company.Assignment.Common.Abstractions.Services;
 
 public interface IAggregateService
 {
-    Task<AggregatedData> GetAggregateData(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default);
+    Task<AggregatedData> GetAggregateData(AggregateFilter? aggregateFilter, CancellationToken cancellationToken = default);
 }

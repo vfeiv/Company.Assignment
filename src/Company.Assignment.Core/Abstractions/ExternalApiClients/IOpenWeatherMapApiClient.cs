@@ -5,5 +5,5 @@ namespace Company.Assignment.Core.Abstractions.ExternalApiClients;
 
 public interface IOpenWeatherMapApiClient
 {
-    Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter? aggregateFilter = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter? aggregateFilter, CancellationToken cancellationToken = default);
 }

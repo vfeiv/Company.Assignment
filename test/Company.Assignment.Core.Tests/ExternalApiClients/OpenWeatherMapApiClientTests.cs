@@ -1,5 +1,4 @@
 ﻿using AutoFixture.Xunit2;
-using Company.Assignment.Common.Dtos;
 using Company.Assignment.Core.ExternalApiClients;
 using Company.Assignment.Core.ExternalApiClients.Models.OpenWeatherMap;
 using Company.Assignment.Core.Mappers;
@@ -59,7 +58,7 @@ public class OpenWeatherMapApiClientTests
                 Content = new StringContent(JsonSerializer.Serialize(apiResponse, _jsonSerializerOptions))
             });
 
-        var response = await _client.GetWeather();
+        var response = await _client.GetWeather(null);
 
         response.Data.Should().NotBeNull();
         response.Data.Should().BeEquivalentTo(_mapper.Map(apiResponse));
@@ -89,7 +88,7 @@ public class OpenWeatherMapApiClientTests
                 Content = new StringContent(JsonSerializer.Serialize(errorResponse, _jsonSerializerOptions))
             });
 
-        var response = await _client.GetWeather();
+        var response = await _client.GetWeather(null);
 
         response.Data.Should().BeNull();
         response.StatusCode.Should().Be(httpStatusCode);
@@ -108,7 +107,7 @@ public class OpenWeatherMapApiClientTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new Exception());
 
-        var response = await _client.GetWeather();
+        var response = await _client.GetWeather(null);
 
         response.Data.Should().BeNull();
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);

@@ -18,12 +18,13 @@ public class TiingoApiClient(
     ILogger<BaseExternalApiClient> logger,
     IOptions<ExternalApisOptions> externalApiOptions,
     IMapper<StockPriceResponse, StockPriceDto> mapper,
-    JsonSerializerOptions jsonSerializerOptions) : BaseExternalApiClient(httpClient, logger, jsonSerializerOptions), IStocksApiClient
+    JsonSerializerOptions jsonSerializerOptions) : BaseExternalApiClient(httpClient, logger, jsonSerializerOptions), ITiingoApiClient
 {
     private readonly IOptions<ExternalApisOptions> _externalApiOptions = externalApiOptions ?? throw new ArgumentNullException(nameof(externalApiOptions));
     private readonly IMapper<StockPriceResponse, StockPriceDto> _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
 
-    public async Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter? aggregateFilter = null, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter? aggregateFilter, CancellationToken cancellationToken = default)
     {
         ApiResponse<IReadOnlyList<StockPriceResponse>?> externalApiResponse;
 
@@ -56,7 +57,7 @@ public class TiingoApiClient(
                 try
                 {
                     apiErrorResponse = JsonSerializer.Deserialize<TiingoApiErrorResponse>(
-                        errorResponseJson != null ? (string)errorResponseJson : string.Empty, jsonSerializerOptions);
+                        errorResponseJson != null ? (string)errorResponseJson : string.Empty, _jsonSerializerOptions);
                 }
                 catch (Exception)
                 {
