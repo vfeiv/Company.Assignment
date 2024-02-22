@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Company.Assignment.Core.Mappers;
 using Company.Assignment.Core.ExternalApiClients.Models.Stocks;
+using Company.Assignment.Core.ExternalApiClients.Models.News;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -38,6 +39,15 @@ public static class ServiceCollectionExtensions
             var httpClient = httpClientFactory.CreateClient("Tiingo");
             return new TiingoApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
         });
+        services.AddScoped<INewsApiClient, NewsApiClient>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<BaseExternalApiClient>>();
+            var mapper = sp.GetRequiredService<IMapper<ArticleResponse, ArticleDto>>();
+            var jsonSerializerOptions = sp.GetRequiredService<JsonSerializerOptions>();
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient("News");
+            return new NewsApiClient(httpClient, logger, mapper, jsonSerializerOptions);
+        });
         return services;
     }
 
@@ -45,6 +55,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IMapper<CurrentWeatherResponse, WeatherDto>, CurrentWeatherResponseToWeatherDto>();
         services.AddScoped<IMapper<StockPriceResponse, StockPriceDto>, StockPriceResponseToStockPriceDto>();
+        services.AddScoped<IMapper<ArticleResponse, ArticleDto>, ArticleResponseToArticleDto>();
 
         return services;
     }
