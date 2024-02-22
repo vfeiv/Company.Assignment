@@ -43,6 +43,7 @@ public abstract class BaseExternalApiClient(HttpClient httpClient, ILogger<BaseE
         return new ExternalApiResponse<T>
         {
             Success = httpResponseMessage.IsSuccessStatusCode,
+            StatusCode = httpResponseMessage.StatusCode,
             ErrorMessage = errorMessage,
             Data = httpResponseMessage.IsSuccessStatusCode ? JsonSerializer.Deserialize<T>(content, _jsonSerializerOptions) : default
         };

@@ -33,6 +33,7 @@ public class OpenWeatherMapApiClient(
         return new ApiResponse<WeatherDto?>
         {
             Success = externalApiResponse.Value.Success,
+            StatusCode = externalApiResponse.Value.StatusCode,
             ErrorMessage = externalApiResponse.Value.ErrorMessage,
             Data = externalApiResponse.Value.Data != default ? _mapper.Map(externalApiResponse.Value.Data) : null
         };

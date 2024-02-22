@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Company.Assignment.Core.Mappers;
+using Company.Assignment.Core.ExternalApiClients.Models.Stocks;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -27,10 +28,28 @@ public static class ServiceCollectionExtensions
             var httpClient = httpClientFactory.CreateClient("OpenWeatherMap");
             return new OpenWeatherMapApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
         });
+        services.AddScoped<IStocksApiClient, StocksApiClient>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<BaseExternalApiClient>>();
+            var options = sp.GetRequiredService<IOptions<ExternalApisOptions>>();
+            var mapper = sp.GetRequiredService<IMapper<StockPriceResponse, StockPriceDto>>();
+            var jsonSerializerOptions = sp.GetRequiredService<JsonSerializerOptions>();
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient("Tiingo");
+            return new StocksApiClient(httpClient, logger, options, mapper, jsonSerializerOptions);
+        });
         return services;
     }
 
     public static IServiceCollection AddMappers(this IServiceCollection services)
+    {
+        services.AddScoped<IMapper<CurrentWeatherResponse, WeatherDto>, CurrentWeatherResponseToWeatherDto>();
+        services.AddScoped<IMapper<StockPriceResponse, StockPriceDto>, StockPriceResponseToStockPriceDto>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton(sp =>
         {
@@ -40,13 +59,6 @@ public static class ServiceCollectionExtensions
             };
         });
 
-        services.AddScoped<IMapper<CurrentWeatherResponse, WeatherDto>, CurrentWeatherResponseToWeatherDto>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddServices(this IServiceCollection services)
-    {
         services.AddScoped<IAggregateService, AggregateService>();
         return services;
     }
