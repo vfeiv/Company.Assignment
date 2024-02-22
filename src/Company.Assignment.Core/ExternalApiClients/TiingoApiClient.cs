@@ -23,23 +23,29 @@ public class TiingoApiClient(
     private readonly IOptions<ExternalApisOptions> _externalApiOptions = externalApiOptions ?? throw new ArgumentNullException(nameof(externalApiOptions));
     private readonly IMapper<StockPriceResponse, StockPriceDto> _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
-    public async Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter? aggregateFilter = null, CancellationToken cancellationToken = default)
     {
         ApiResponse<IReadOnlyList<StockPriceResponse>?> externalApiResponse;
+
+        if (aggregateFilter == null)
+        {
+            aggregateFilter = new AggregateFilter();
+        }
+
         var queryParams = new Dictionary<string, StringValues>
             {
                 { "token", _externalApiOptions.Value["Tiingo"].ApiKey }
             };
 
-        if (aggregateFilter.StockPrice.StartDate is not null)
-            queryParams.Add("startDate", aggregateFilter.StockPrice.StartDate.Value.ToString("yyyy-MM-dd"));
+        if (aggregateFilter.Value.StockPrice.StartDate is not null)
+            queryParams.Add("startDate", aggregateFilter.Value.StockPrice.StartDate.Value.ToString("yyyy-MM-dd"));
 
-        if (aggregateFilter.StockPrice.EndDate is not null)
-            queryParams.Add("endDate", aggregateFilter.StockPrice.EndDate.Value.ToString("yyyy-MM-dd"));
+        if (aggregateFilter.Value.StockPrice.EndDate is not null)
+            queryParams.Add("endDate", aggregateFilter.Value.StockPrice.EndDate.Value.ToString("yyyy-MM-dd"));
 
         try
         {
-            externalApiResponse = await GetRequest<IReadOnlyList<StockPriceResponse>>($"/tiingo/daily/{aggregateFilter.StockPrice.Ticker}/prices", queryParams, cancellationToken);
+            externalApiResponse = await GetRequest<IReadOnlyList<StockPriceResponse>>($"/tiingo/daily/{aggregateFilter.Value.StockPrice.Ticker}/prices", queryParams, cancellationToken);
         }
         catch (ExternalApiException ex)
         {

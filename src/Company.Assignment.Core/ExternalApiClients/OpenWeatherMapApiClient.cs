@@ -22,14 +22,21 @@ public class OpenWeatherMapApiClient(
 {
     private readonly IOptions<ExternalApisOptions> _externalApiOptions = externalApiOptions ?? throw new ArgumentNullException(nameof(externalApiOptions));
     private readonly IMapper<CurrentWeatherResponse, WeatherDto> _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
 
-    public async Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<WeatherDto?>> GetWeather(AggregateFilter? aggregateFilter = null, CancellationToken cancellationToken = default)
     {
         ApiResponse<CurrentWeatherResponse> externalApiResponse;
+
+        if(aggregateFilter == null)
+        {
+            aggregateFilter = new AggregateFilter();
+        }
+
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "lat", new StringValues(aggregateFilter.Weather.Lat.ToString()) },
-            { "lon", new StringValues(aggregateFilter.Weather.Lon.ToString()) },
+            { "lat", new StringValues(aggregateFilter.Value.Weather.Lat.ToString()) },
+            { "lon", new StringValues(aggregateFilter.Value.Weather.Lon.ToString()) },
             { "appid", _externalApiOptions.Value["OpenWeatherMap"].ApiKey }
         };
 
@@ -46,7 +53,7 @@ public class OpenWeatherMapApiClient(
                 try
                 {
                     apiErrorResponse = JsonSerializer.Deserialize<OpenWeatherMapApiErrorResponse>(
-                        errorResponseJson != null ? (string)errorResponseJson : string.Empty, jsonSerializerOptions);
+                        errorResponseJson != null ? (string)errorResponseJson : string.Empty, _jsonSerializerOptions);
                 }
                 catch (Exception)
                 {

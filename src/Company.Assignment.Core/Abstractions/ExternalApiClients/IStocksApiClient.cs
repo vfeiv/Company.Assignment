@@ -5,5 +5,5 @@ namespace Company.Assignment.Core.Abstractions.ExternalApiClients;
 
 public interface IStocksApiClient
 {
-    Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter aggregateFilter, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IReadOnlyList<StockPriceDto>>> GetStockPrices(AggregateFilter? aggregateFilter = null, CancellationToken cancellationToken = default);
 }
