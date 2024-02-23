@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-<h2 align="center">Aggregation Api</h3>
+<h1 align="center">Aggregation Api</h1>
 
 
 <!-- ABOUT THE PROJECT -->
