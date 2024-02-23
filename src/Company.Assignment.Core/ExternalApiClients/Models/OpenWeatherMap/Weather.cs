@@ -6,14 +6,17 @@ public readonly record struct Weather
     /// Weather condition id
     /// </summary>
     public int Id { get; init; }
+
     /// <summary>
     /// Group of weather parameters (Rain, Snow, Clouds etc.)
     /// </summary>
     public string Main { get; init; }
+
     /// <summary>
     /// Weather condition within the group
     /// </summary>
     public string Description { get; init; }
+
     /// <summary>
     /// Weather icon id
     /// </summary>
@@ -35,10 +38,12 @@ public readonly record struct Wind
     /// Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour
     /// </summary>
     public double Speed { get; init; }
+
     /// <summary>
     ///  Wind direction, degrees (meteorological)
     /// </summary>
     public double Deg { get; init; }
+
     /// <summary>
     /// Wind gust. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour
     /// </summary>

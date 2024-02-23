@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace Company.Assignment.Common.Filters;
 
@@ -8,8 +7,14 @@ public readonly record struct WeatherFilter
 {
     public WeatherFilter() { }
 
+    /// <summary>
+    ///  Longitude of the location
+    /// </summary>
     public double Lon { get; init; } = 23.45005;
 
+    /// <summary>
+    /// Latitude of the location
+    /// </summary>
     public double Lat { get; init; } = 37.58596;
 
     public static ValueTask<WeatherFilter?> BindAsync(HttpContext context, ParameterInfo parameter)

@@ -6,6 +6,7 @@ public readonly record struct Coord
     ///  Longitude of the location
     /// </summary>
     public double Lon { get; init; }
+
     /// <summary>
     /// Latitude of the location
     /// </summary>

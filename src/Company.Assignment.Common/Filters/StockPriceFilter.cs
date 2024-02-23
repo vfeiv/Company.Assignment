@@ -7,10 +7,21 @@ public readonly record struct StockPriceFilter
 {
     public StockPriceFilter() { }
 
+    /// <summary>
+    /// Ticker related to the asset.
+    /// </summary>
     public string Ticker { get; init; } = "aapl";
 
+    /// <summary>
+    /// If startDate or endDate is not null, historical data will be queried.
+    /// This filter limits metrics to on or after the startDate (>=).
+    /// </summary>
     public DateTime? StartDate { get; init; }
 
+    /// <summary>
+    /// If startDate or endDate is not null, historical data will be queried.
+    /// This filter limits metrics to on or before the endDate(<=).
+    /// </summary>
     public DateTime? EndDate { get; init; }
 
     public static ValueTask<StockPriceFilter?> BindAsync(HttpContext context, ParameterInfo parameter)

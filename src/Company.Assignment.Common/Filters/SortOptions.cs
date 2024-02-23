@@ -5,8 +5,15 @@ namespace Company.Assignment.Common.Filters;
 
 public readonly record struct SortOptions
 {
+    /// <summary>
+    /// Column to sort by. 
+    /// </summary>
     public SortBy SortBy { get; init; }
 
+    /// <summary>
+    /// Sort direction.
+    /// Prepend "desc" if you want descending order or "asc" for ascending. Default is "asc".
+    /// </summary>
     public SortDirection SortDirection { get; init; }
 
     public static ValueTask<SortOptions?> BindAsync(HttpContext context, ParameterInfo parameter)
