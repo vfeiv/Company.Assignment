@@ -1,4 +1,5 @@
 ﻿using AutoFixture.Xunit2;
+using Company.Assignment.Common.Filters;
 using Company.Assignment.Core.ExternalApiClients;
 using Company.Assignment.Core.ExternalApiClients.Models.News;
 using Company.Assignment.Core.ExternalApiClients.Models.Stocks;
@@ -121,5 +122,85 @@ public class NewsApiClientTests
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
         response.Success.Should().BeFalse();
         response.ErrorMessage.Should().Be("Something went wrong");
+    }
+
+    [Theory, AutoData]
+    public async Task ShouldReturn_SortResultsAsc_WhenSortingOptionsEnabled(DateTime date1, DateTime date2)
+    {
+        var apiResponse = new TopHeadLinesRespone
+        {
+            Articles = [
+                new() {
+                    PublishedAt = date1.ToString()
+                },
+                new() {
+                    PublishedAt = date2.ToString()
+                }
+            ]
+        };
+
+        _mockHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(x => x.Method == HttpMethod.Get),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(apiResponse, _jsonSerializerOptions))
+            });
+
+        var response = await _client.GetTopHeadlines(new AggregateFilter
+        {
+            SortOptions = new SortOptions
+            {
+                SortBy = SortBy.Date,
+                SortDirection = SortDirection.Asc
+            }
+        });
+
+        response.Data.Should().NotBeNull();
+        response.Data.Should().BeInAscendingOrder(x => x.PublishedAt);
+    }
+
+    [Theory, AutoData]
+    public async Task ShouldReturn_SortResultsDesc_WhenSortingOptionsEnabled(DateTime date1, DateTime date2)
+    {
+        var apiResponse = new TopHeadLinesRespone
+        {
+            Articles = [
+                new() {
+                    PublishedAt = date1.ToString()
+                },
+                new() {
+                    PublishedAt = date2.ToString()
+                }
+            ]
+        };
+
+        _mockHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(x => x.Method == HttpMethod.Get),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(apiResponse, _jsonSerializerOptions))
+            });
+
+        var response = await _client.GetTopHeadlines(new AggregateFilter
+        {
+            SortOptions = new SortOptions
+            {
+                SortBy = SortBy.Date,
+                SortDirection = SortDirection.Desc
+            }
+        });
+
+        response.Data.Should().NotBeNull();
+        response.Data.Should().BeInDescendingOrder(x => x.PublishedAt);
     }
 }
