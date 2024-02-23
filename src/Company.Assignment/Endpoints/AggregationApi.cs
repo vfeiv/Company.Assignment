@@ -2,11 +2,18 @@
 {
     public static class AggregationApi
     {
-        public static RouteHandlerBuilder MapAggregatedDataEndpoints(this IEndpointRouteBuilder routes)
+        public static RouteHandlerBuilder MapAggregatedDataEndpoints(this IEndpointRouteBuilder routes, WebApplication app)
         {
-            return routes.MapGet("/aggregated-data", AggregatedDataHandler.Get)
-            .WithName("GetAggregatedData")
-            .WithOpenApi();
+            var route = routes.MapGet("/aggregated-data", AggregatedDataHandler.Get)
+                .WithName("GetAggregatedData")
+                .WithOpenApi();
+
+            if(!app.Environment.IsDevelopment())
+            {
+                route.RequireAuthorization();
+            }
+
+            return route;
         }
     }
 }

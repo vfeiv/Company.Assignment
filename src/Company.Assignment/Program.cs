@@ -35,6 +35,6 @@ app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
 
-app.MapAggregatedDataEndpoints();
+app.MapAggregatedDataEndpoints(app);
 
 app.Run();
