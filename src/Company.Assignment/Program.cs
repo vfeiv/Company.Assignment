@@ -13,6 +13,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddHttpClients(builder.Configuration.GetSection(ExternalApisOptions.ConfigurationKey));
 builder.Services.AddCoreServices();
+builder.Services.AddDistributedMemoryCache();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
